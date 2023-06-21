@@ -2,9 +2,42 @@ import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { StyleSheet, Button, Image, Text, TextInput, Alert, SafeAreaView } from 'react-native';
 
-const Login = () => {
-  const [text, onChangeText] = React.useState('');
-  const [text2, onChangeText2] = React.useState('');
+import {useState, useContext } from 'react';
+import { AxiosInstance } from '../api/AxiosInstance';
+import { DataContext } from '../context/DataContext';
+
+export const LoginScreen = ({ navigation }) => {
+
+
+  const [usuario, setUsuario] = React.useState('');
+  const [senha, setSenha] = React.useState('');
+  const {armazenarDadosUsuario} = useContext(DataContext);
+
+
+  const handleLogin = async () => {
+    
+    try{
+      const resultado = await AxiosInstance.post('/auth/signin',{
+        username: usuario,
+        password: senha
+      });
+
+      if(resultado.status === 200){
+        
+        var jwtToken =resultado.data;
+        armazenarDadosUsuario(jwtToken["accessToken"]);
+
+        navigation.navigate('Home')
+
+      } else {
+        console.log('erro');
+      }
+
+    }catch (error){
+      console.log('erro: ' + error);
+    }
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <Image
@@ -16,23 +49,21 @@ const Login = () => {
       <Text style={styles.baseText}>Bem vindo</Text>
       <TextInput
         style={styles.input}
-        onChangeText={onChangeText}
-        value={text}
-        placeholder="Email"
+        onChangeText={setUsuario}
+        value={usuario}
+        placeholder="Usuario"
       />
       <TextInput
         style={styles.input}
-        onChangeText={onChangeText2}
-        value={text2}
+        onChangeText={setSenha}
+        value={senha}
         placeholder="Senha"
       />
 
       <Button
         title="Entrar"
-        color="#FDB927"
-        onPress={() =>
-          this.props.navigation.navigate('Home')
-        }
+        color="#efb810"
+        onPress={handleLogin}
       />
       <StatusBar style="auto" />
     </SafeAreaView>
@@ -42,7 +73,7 @@ const Login = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#552583',
+    backgroundColor: '#964b00',
     alignItems: 'center',
     justifyContent: 'center',
 
@@ -54,7 +85,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 9,
     padding: 10,
-    backgroundColor: '#FFF',
+    backgroundColor: '#f5f5f5',
   },
   tinyLogo: {
     width: 100,
@@ -71,8 +102,6 @@ const styles = StyleSheet.create({
   baseText: {
     fontWeight: 'bold',
     fontSize: 20,
-    color: '#FDB927',
+    color: '#efb810',
   },
 });
-
-export default Login;
